@@ -72,6 +72,7 @@ async def help(ctx):
     embed.add_field(name="!boost", value="Slightly increases the ranking of a player", inline=False)
     embed.add_field(name="!kick (player-name)", value="Kicks a player from the 5v5", inline=False)
     embed.add_field(name="!leave", value="Removes you from the 5v5", inline=False)
+    embed.add_field(name="!reset", value="Removes all players", inline=False)
     await ctx.send(embed=embed)
     
 
