@@ -87,7 +87,7 @@ def format_players(players):
     result = ""
     cnt = 1
     for player in players:
-        result += str(cnt) + ". " + player.user + " (" + str(player.rank) + ")" + "\n"
+        result += str(cnt) + ". " + player.user + "\n"
         cnt += 1
     return result
 
