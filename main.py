@@ -190,4 +190,4 @@ async def kick(ctx, player):
         await ctx.send(str(player) + ' is not in the party.')
 
 
-bot.run(os.getenv('KEY'))
+bot.run(os.getenv('BOT-KEY'))
