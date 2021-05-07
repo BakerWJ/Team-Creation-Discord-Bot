@@ -54,8 +54,6 @@ def get_server(guild) -> Server:
 
 @bot.before_invoke
 async def create_guild(ctx):
-    print(ctx.guild.id)
-    print(servers)
     if ctx.guild.id not in servers:
         servers[ctx.guild.id] = Server()
 
