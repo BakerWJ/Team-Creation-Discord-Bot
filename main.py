@@ -73,6 +73,7 @@ async def help(ctx):
     embed.add_field(name="!kick (player-name)", value="Kicks a player from the 5v5", inline=False)
     embed.add_field(name="!leave", value="Removes you from the 5v5", inline=False)
     embed.add_field(name="!reset", value="Removes all players", inline=False)
+    embed.add_field(name="!randommap", value="Gives a random map", inline=False)
     await ctx.send(embed=embed)
     
 
@@ -274,5 +275,9 @@ async def kick(ctx, player):
     else:
         await ctx.send(str(player) + ' is not in the party.')
 
+
+@bot.command()
+async def randommap(ctx):
+    await ctx.send(random.choice(['Bind', 'Split', 'Haven', 'Icebox']))
 
 bot.run(os.getenv('BOT-KEY'))
