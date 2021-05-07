@@ -1,7 +1,8 @@
 import os
 import random
+import pymongo
+from pymongo import MongoClient
 from itertools import combinations
-
 import discord
 from discord.ext import commands
 
@@ -9,6 +10,14 @@ from server import Player, TeamCombination, Server
 
 bot = commands.Bot(command_prefix='!', help_command=None)
 
+cluster = MongoClient(os.getenv('MONGO-KEY'))
+
+db = cluster["5v5botDB"]
+
+collection = db["5v5bot"]
+
+#server = [Player('jason', 990), Player('angus', 960), Player('naveed', 860), Player('baker', 830), Player('jeff', 800), Player('nipun', 960), Player('davidw', 830), Player('alexp', 860), Player('joshd', 830), Player('alexl', 960)]
+#servers[839919269898616833].current_players = server
 servers = {}
 
 # RANKS is a dictionary that maps a Valorant rank to elo
@@ -32,19 +41,23 @@ RANKS = {
     'diamond1': 940,
     'diamond2': 960,
     'diamond3': 980,
-    'radiant': 1020
+    'immortal1': 1000,
+    'immortal2': 1020,
+    'immortal3': 1040,
+    'radiant': 1080
 }
 
 
 def get_server(guild) -> Server:
-    return servers[guild]
+    return servers[guild.id]
 
 
 @bot.before_invoke
 async def create_guild(ctx):
     print(ctx.guild.id)
-    if ctx.guild not in servers:
-        servers[ctx.guild] = Server()
+    print(servers)
+    if ctx.guild.id not in servers:
+        servers[ctx.guild.id] = Server()
 
 
 @bot.command()
@@ -216,13 +229,21 @@ async def winner(ctx, val):
     if val == '1':
         for player in server.team1:
             player.rank += 8
+            post = {"_id": player.user, "wins": 1, "loss": 0}
+            collection.insert_one(post)
         for player in server.team2:
             player.rank -= 8
+            post = {"_id": player.user, "wins": 0, "loss": 1}
+            collection.insert_one(post)
     elif val == '2':
         for player in server.team2:
             player.rank += 8
+            post = {"_id": player.user, "wins": 1, "loss": 0}
+            collection.insert_one(post)
         for player in server.team1:
             player.rank -= 8
+            post = {"_id": player.user, "wins": 0, "loss": 1}
+            collection.insert_one(post)
     server.game_over = True
     await ctx.send('GGWP! Want to play another?')
 
@@ -277,6 +298,5 @@ async def kick(ctx, player):
 @bot.command()
 async def randommap(ctx):
     await ctx.send(random.choice(['Bind', 'Split', 'Haven', 'Icebox', 'Breeze']))
-
 
 bot.run(os.getenv('BOT-KEY'))
