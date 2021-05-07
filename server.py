@@ -33,12 +33,14 @@ class Server:
     current_players: list[Player]
     teams: list[TeamCombination]
     current_team: int
-    team1: TeamCombination
-    team2: TeamCombination
+    team1: list[Player]
+    team2: list[Player]
     game_over: bool
 
     def __init__(self):
         self.current_team = 0
         self.current_players = []
         self.teams = []
+        self.team1 = []
+        self.team2 = []
         self.game_over = True
