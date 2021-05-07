@@ -17,8 +17,9 @@ db = cluster["5v5botDB"]
 collection = db["5v5bot"]
 
 #server = [Player('jason', 990), Player('angus', 960), Player('naveed', 860), Player('baker', 830), Player('jeff', 800), Player('nipun', 960), Player('davidw', 830), Player('alexp', 860), Player('joshd', 830), Player('alexl', 960)]
-#servers[839919269898616833].current_players = server
 servers = {}
+#servers[839919269898616833].current_players = server
+
 
 # RANKS is a dictionary that maps a Valorant rank to elo
 # Larger increments are used for ranks with greater skill disparity
@@ -75,6 +76,7 @@ async def help(ctx):
     embed.add_field(name="!leave", value="Removes you from the 5v5", inline=False)
     embed.add_field(name="!reset", value="Removes all players", inline=False)
     embed.add_field(name="!randommap", value="Gives a random map", inline=False)
+    embed.add_field(name="!stats", value="Displays your stats with win/loss", inline=False)
     await ctx.send(embed=embed)
 
 
@@ -88,6 +90,16 @@ def win_probability(team1: list[Player], team2: list[Player]) -> float:
     p = 1 / (1 + 10 ** ((sum1 - sum2) / 400))
     return p
 
+#Adds a Player to the database, or updates their win/loss if already present
+def addUser(userid, win, loss):
+    playerDB = collection.find_one({"_id": userid})
+    if playerDB == None:
+        post = {"_id": userid, "wins": win, "losses": loss}
+        collection.insert_one(post)
+    else:
+        post = {"_id": userid, "wins": win, "loss": loss}
+        collection.update_one({"_id": userid}, {"$set": {"wins": playerDB["wins"] + win}})
+        collection.update_one({"_id": userid}, {"$set": {"losses": playerDB["losses"] + loss}})
 
 @bot.command()
 async def join(ctx, rank):
@@ -109,6 +121,7 @@ async def join(ctx, rank):
     if len(current_players) >= 10:
         await ctx.send('There are already 10 people in the game')
         return
+    addUser(str(player), 0, 0)
     current_players.append(Player(str(player), elo))
     embed = discord.Embed()
     embed.add_field(name="Join success", value=str(player) + " has successfully joined!", inline=False)
@@ -206,11 +219,13 @@ async def choose(ctx):
     choose locks in the current team choices and the game begins!
     """
     server = get_server(ctx.guild)
+    if not server.teams:
+        await ctx.send('Teams have not been made')
+        return
     server.team1 = server.teams[server.current_team].team1
     server.team2 = server.teams[server.current_team].team2
     server.game_over = False
     await ctx.send('glhf!')
-
 
 @bot.command()
 async def winner(ctx, val):
@@ -227,22 +242,20 @@ async def winner(ctx, val):
     if val == '1':
         for player in server.team1:
             player.rank += 8
-            post = {"_id": player.user, "wins": 1, "loss": 0}
-            collection.insert_one(post)
+            addUser(player.user, 1, 0)
         for player in server.team2:
             player.rank -= 8
-            post = {"_id": player.user, "wins": 0, "loss": 1}
-            collection.insert_one(post)
+            addUser(player.user, 0, 1)
     elif val == '2':
         for player in server.team2:
             player.rank += 8
-            post = {"_id": player.user, "wins": 1, "loss": 0}
-            collection.insert_one(post)
+            addUser(player.user, 1, 0)
         for player in server.team1:
             player.rank -= 8
-            post = {"_id": player.user, "wins": 0, "loss": 1}
-            collection.insert_one(post)
+            addUser(player.user, 0, 1)
     server.game_over = True
+    server.current_team = 0
+    server.teams = []
     await ctx.send('GGWP! Want to play another?')
 
 
@@ -296,5 +309,21 @@ async def kick(ctx, player):
 @bot.command()
 async def randommap(ctx):
     await ctx.send(random.choice(['Bind', 'Split', 'Haven', 'Icebox', 'Breeze']))
+
+@bot.command()
+async def stats(ctx, args):
+    player = args
+    playerDB = collection.find_one({"_id": player})
+    if playerDB == None:
+        await ctx.send("Player not found!")
+    else:
+        embed = discord.Embed(title=player+"'s Stats")
+        embed.add_field(name="Wins", value=playerDB["wins"], inline=False)
+        embed.add_field(name="Losses", value=playerDB["losses"], inline=False)
+        if playerDB["losses"] == 0:
+            embed.add_field(name="WL", value = playerDB["wins"], inline=False)
+        else:
+            embed.add_field(name="WL", value = playerDB["wins"]/playerDB["losses"], inline=False)
+        await ctx.send(embed=embed)
 
 bot.run(os.getenv('BOT-KEY'))
