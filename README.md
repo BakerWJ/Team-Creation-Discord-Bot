@@ -1,4 +1,4 @@
-# Valorant-Discord-Bot
+# Valorant Discord Bot
 
 The Valorant Discord Bot is a Discord bot that allows users to create teams for custom games. Players are assigned elo based off of their Valorant competitive rank and fair teams are made by minimizing the difference between the win probabilities of two potential teams.
 
