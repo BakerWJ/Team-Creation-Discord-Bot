@@ -12,25 +12,27 @@ bot = commands.Bot(command_prefix='!', help_command=None)
 servers = {}
 
 # RANKS is a dictionary that maps a Valorant rank to elo
+# Larger increments are used for ranks with greater skill disparity
 RANKS = {
-    'iron1': 575,
-    'iron2': 590,
-    'iron3': 600,
-    'bronze1': 620,
-    'bronze2': 640,
-    'bronze3': 660,
-    'silver1': 680,
-    'silver2': 700,
-    'silver3': 720,
-    'gold1': 740,
-    'gold2': 760,
-    'gold3': 780,
-    'plat1': 800,
-    'plat2': 820,
-    'plat3': 840,
-    'diamond1': 860,
-    'diamond2': 880,
-    'diamond3': 900
+    'iron1': 570,
+    'iron2': 610,
+    'iron3': 650,
+    'bronze1': 670,
+    'bronze2': 690,
+    'bronze3': 710,
+    'silver1': 730,
+    'silver2': 750,
+    'silver3': 770,
+    'gold1': 800,
+    'gold2': 830,
+    'gold3': 860,
+    'plat1': 880,
+    'plat2': 900,
+    'plat3': 920,
+    'diamond1': 940,
+    'diamond2': 960,
+    'diamond3': 980,
+    'radiant': 1020
 }
 
 
