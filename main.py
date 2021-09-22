@@ -8,44 +8,44 @@ from discord.ext import commands
 
 from server import Player, TeamCombination, Server
 
-bot = commands.Bot(command_prefix='!', help_command=None)
+bot = commands.Bot(command_prefix="!", help_command=None)
 
-cluster = MongoClient(os.getenv('MONGO-KEY'))
+cluster = MongoClient(os.getenv("MONGO-KEY"))
 
 db = cluster["5v5botDB"]
 
 collection = db["5v5bot"]
 
-#server = [Player('jason', 990), Player('angus', 960), Player('naveed', 860), Player('baker', 830), Player('jeff', 800), Player('nipun', 960), Player('davidw', 830), Player('alexp', 860), Player('joshd', 830), Player('alexl', 960)]
+# server = [Player('jason', 990), Player('angus', 960), Player('naveed', 860), Player('baker', 830), Player('jeff', 800), Player('nipun', 960), Player('davidw', 830), Player('alexp', 860), Player('joshd', 830), Player('alexl', 960)]
 servers = {}
-#servers[839919269898616833].current_players = server
+# servers[839919269898616833].current_players = server
 
 
 # RANKS is a dictionary that maps a Valorant rank to elo
 # Larger increments are used for ranks with greater skill disparity
 RANKS = {
-    'iron1': 570,
-    'iron2': 610,
-    'iron3': 650,
-    'bronze1': 670,
-    'bronze2': 690,
-    'bronze3': 710,
-    'silver1': 730,
-    'silver2': 750,
-    'silver3': 770,
-    'gold1': 800,
-    'gold2': 830,
-    'gold3': 860,
-    'plat1': 880,
-    'plat2': 900,
-    'plat3': 920,
-    'diamond1': 940,
-    'diamond2': 960,
-    'diamond3': 980,
-    'immortal1': 1000,
-    'immortal2': 1020,
-    'immortal3': 1040,
-    'radiant': 1080
+    "iron1": 570,
+    "iron2": 610,
+    "iron3": 650,
+    "bronze1": 670,
+    "bronze2": 690,
+    "bronze3": 710,
+    "silver1": 730,
+    "silver2": 750,
+    "silver3": 770,
+    "gold1": 800,
+    "gold2": 830,
+    "gold3": 860,
+    "plat1": 880,
+    "plat2": 900,
+    "plat3": 920,
+    "diamond1": 940,
+    "diamond2": 960,
+    "diamond3": 980,
+    "immortal1": 1000,
+    "immortal2": 1020,
+    "immortal3": 1040,
+    "radiant": 1080,
 }
 
 
@@ -63,20 +63,36 @@ async def create_guild(ctx):
 async def help(ctx):
     embed = discord.Embed(title="5v5 Bot Help")
     embed.set_thumbnail(
-        url="https://yt3.ggpht.com/ytc/AAUvwnh5cX3Hpigfm2Y3X1VAd1QrVBWgzFeaIM8RAuTu=s900-c-k-c0x00ffffff-no-rj")
-    embed.add_field(name="!join (rank)", value="Adds you to the 5v5 (!join gold2)", inline=False)
-    embed.add_field(name="!players", value="Displays all players in the 5v5", inline=False)
-    embed.add_field(name="!maketeams", value="Makes teams according to rankings", inline=False)
+        url="https://yt3.ggpht.com/ytc/AAUvwnh5cX3Hpigfm2Y3X1VAd1QrVBWgzFeaIM8RAuTu=s900-c-k-c0x00ffffff-no-rj"
+    )
+    embed.add_field(
+        name="!join (rank)", value="Adds you to the 5v5 (!join gold2)", inline=False
+    )
+    embed.add_field(
+        name="!players", value="Displays all players in the 5v5", inline=False
+    )
+    embed.add_field(
+        name="!maketeams", value="Makes teams according to rankings", inline=False
+    )
     embed.add_field(name="!next", value="Shows a new variation of teams", inline=False)
     embed.add_field(name="!choose", value="Locks in the teams", inline=False)
-    embed.add_field(name="!winner (0,1,2)", value="Input the winner of the 5v5 (!winner 1 for Team 1, 0 for a tie)",
-                    inline=False)
-    embed.add_field(name="!boost", value="Slightly increases the ranking of a player", inline=False)
-    embed.add_field(name="!kick (player-name)", value="Kicks a player from the 5v5", inline=False)
+    embed.add_field(
+        name="!winner (0,1,2)",
+        value="Input the winner of the 5v5 (!winner 1 for Team 1, 0 for a tie)",
+        inline=False,
+    )
+    embed.add_field(
+        name="!boost", value="Slightly increases the ranking of a player", inline=False
+    )
+    embed.add_field(
+        name="!kick (player-name)", value="Kicks a player from the 5v5", inline=False
+    )
     embed.add_field(name="!leave", value="Removes you from the 5v5", inline=False)
     embed.add_field(name="!reset", value="Removes all players", inline=False)
     embed.add_field(name="!randommap", value="Gives a random map", inline=False)
-    embed.add_field(name="!stats", value="Displays your stats with win/loss", inline=False)
+    embed.add_field(
+        name="!stats", value="Displays your stats with win/loss", inline=False
+    )
     await ctx.send(embed=embed)
 
 
@@ -90,7 +106,8 @@ def win_probability(team1: list[Player], team2: list[Player]) -> float:
     p = 1 / (1 + 10 ** ((sum1 - sum2) / 400))
     return p
 
-#Adds a Player to the database, or updates their win/loss if already present
+
+# Adds a Player to the database, or updates their win/loss if already present
 def addUser(userid, win, loss):
     playerDB = collection.find_one({"_id": userid})
     if playerDB == None:
@@ -98,8 +115,13 @@ def addUser(userid, win, loss):
         collection.insert_one(post)
     else:
         post = {"_id": userid, "wins": win, "loss": loss}
-        collection.update_one({"_id": userid}, {"$set": {"wins": playerDB["wins"] + win}})
-        collection.update_one({"_id": userid}, {"$set": {"losses": playerDB["losses"] + loss}})
+        collection.update_one(
+            {"_id": userid}, {"$set": {"wins": playerDB["wins"] + win}}
+        )
+        collection.update_one(
+            {"_id": userid}, {"$set": {"losses": playerDB["losses"] + loss}}
+        )
+
 
 @bot.command()
 async def join(ctx, rank):
@@ -112,19 +134,23 @@ async def join(ctx, rank):
     player = ctx.author
     for p in current_players:
         if p.user == str(player):
-            await ctx.send(str(player) + ' has already been added to the game!')
+            await ctx.send(str(player) + " has already been added to the game!")
             return
     if rank not in RANKS:
         await ctx.send("Please give a valid rank!")
         return
     elo = RANKS[rank]
     if len(current_players) >= 10:
-        await ctx.send('There are already 10 people in the game')
+        await ctx.send("There are already 10 people in the game")
         return
     addUser(str(player), 0, 0)
     current_players.append(Player(str(player), elo))
     embed = discord.Embed()
-    embed.add_field(name="Join success", value=str(player) + " has successfully joined!", inline=False)
+    embed.add_field(
+        name="Join success",
+        value=str(player) + " has successfully joined!",
+        inline=False,
+    )
     await ctx.send(embed=embed)
 
 
@@ -165,7 +191,9 @@ async def players(ctx):
     """
     server = get_server(ctx.guild)
     embed = discord.Embed()
-    embed.add_field(name="Players", value=format_players(server.current_players), inline=False)
+    embed.add_field(
+        name="Players", value=format_players(server.current_players), inline=False
+    )
     await ctx.send(embed=embed)
 
 
@@ -179,7 +207,7 @@ async def maketeams(ctx):
     server.current_team = 0
     server.teams = []
     if len(server.current_players) != 10:
-        await ctx.send('Please get 10 players!')
+        await ctx.send("Please get 10 players!")
         return
     for combo in combinations(server.current_players, 5):
         team2 = [x for x in server.current_players if x not in combo]
@@ -190,9 +218,14 @@ async def maketeams(ctx):
     random.shuffle(server.teams)
 
     embed = discord.Embed()
-    embed.add_field(name="5v5 Teams",
-                    value='Team 1:\n' + format_players(server.teams[0].team1) + '\nTeam 2:\n' + format_players(
-                        server.teams[0].team2), inline=False)
+    embed.add_field(
+        name="5v5 Teams",
+        value="Team 1:\n"
+        + format_players(server.teams[0].team1)
+        + "\nTeam 2:\n"
+        + format_players(server.teams[0].team2),
+        inline=False,
+    )
     await ctx.send(embed=embed)
 
 
@@ -205,9 +238,14 @@ async def next(ctx):
     server.current_team += 1
     if server.current_team < len(server.teams):
         embed = discord.Embed()
-        embed.add_field(name="5v5 Teams", value='Team 1:\n' + format_players(
-            server.teams[server.current_team].team1) + '\nTeam 2:\n' + format_players(
-            server.teams[server.current_team].team2), inline=False)
+        embed.add_field(
+            name="5v5 Teams",
+            value="Team 1:\n"
+            + format_players(server.teams[server.current_team].team1)
+            + "\nTeam 2:\n"
+            + format_players(server.teams[server.current_team].team2),
+            inline=False,
+        )
         await ctx.send(embed=embed)
     else:
         await ctx.send("Teams have not been made")
@@ -220,12 +258,13 @@ async def choose(ctx):
     """
     server = get_server(ctx.guild)
     if not server.teams:
-        await ctx.send('Teams have not been made')
+        await ctx.send("Teams have not been made")
         return
     server.team1 = server.teams[server.current_team].team1
     server.team2 = server.teams[server.current_team].team2
     server.game_over = False
-    await ctx.send('glhf!')
+    await ctx.send("glhf!")
+
 
 @bot.command()
 async def winner(ctx, val):
@@ -235,18 +274,18 @@ async def winner(ctx, val):
     """
     server = get_server(ctx.guild)
     if server.game_over:
-        await ctx.send('There is no game right now - get some friends and make teams')
+        await ctx.send("There is no game right now - get some friends and make teams")
         return
-    if val not in {'0', '1', '2'}:
-        await ctx.send('Not a valid team!')
-    if val == '1':
+    if val not in {"0", "1", "2"}:
+        await ctx.send("Not a valid team!")
+    if val == "1":
         for player in server.team1:
             player.rank += 8
             addUser(player.user, 1, 0)
         for player in server.team2:
             player.rank -= 8
             addUser(player.user, 0, 1)
-    elif val == '2':
+    elif val == "2":
         for player in server.team2:
             player.rank += 8
             addUser(player.user, 1, 0)
@@ -256,7 +295,7 @@ async def winner(ctx, val):
     server.game_over = True
     server.current_team = 0
     server.teams = []
-    await ctx.send('GGWP! Want to play another?')
+    await ctx.send("GGWP! Want to play another?")
 
 
 @bot.command()
@@ -285,7 +324,7 @@ async def leave(ctx):
         if p.user == player:
             server.current_players.remove(p)
             break
-    await ctx.send('You have left the party. We hope you had fun!')
+    await ctx.send("You have left the party. We hope you had fun!")
 
 
 @bot.command()
@@ -303,12 +342,13 @@ async def kick(ctx, player):
     if kicked:
         await ctx.send(str(player) + " has been kicked. rip")
     else:
-        await ctx.send(str(player) + ' is not in the party.')
+        await ctx.send(str(player) + " is not in the party.")
 
 
 @bot.command()
 async def randommap(ctx):
-    await ctx.send(random.choice(['Bind', 'Split', 'Haven', 'Icebox', 'Breeze']))
+    await ctx.send(random.choice(["Bind", "Split", "Haven", "Icebox", "Breeze"]))
+
 
 @bot.command()
 async def stats(ctx, args):
@@ -317,13 +357,16 @@ async def stats(ctx, args):
     if playerDB == None:
         await ctx.send("Player not found!")
     else:
-        embed = discord.Embed(title=player+"'s Stats")
+        embed = discord.Embed(title=player + "'s Stats")
         embed.add_field(name="Wins", value=playerDB["wins"], inline=False)
         embed.add_field(name="Losses", value=playerDB["losses"], inline=False)
         if playerDB["losses"] == 0:
-            embed.add_field(name="WL", value = playerDB["wins"], inline=False)
+            embed.add_field(name="WL", value=playerDB["wins"], inline=False)
         else:
-            embed.add_field(name="WL", value = playerDB["wins"]/playerDB["losses"], inline=False)
+            embed.add_field(
+                name="WL", value=playerDB["wins"] / playerDB["losses"], inline=False
+            )
         await ctx.send(embed=embed)
 
-bot.run(os.getenv('BOT-KEY'))
+
+bot.run(os.getenv("BOT-KEY"))

@@ -7,6 +7,7 @@ class Player:
     The Player class represents a discord user. The rank value
     is determined based off of their Valorant Competitive rank.
     """
+
     user: str
     rank: int
 
@@ -21,6 +22,7 @@ class TeamCombination:
     of 5 players vs 5 players. The evaluation is the difference
     between these teams and perfectly fair teams
     """
+
     team1: list[Player]
     team2: list[Player]
     evaluation: float
@@ -30,6 +32,7 @@ class Server:
     """
     Represents one discord servers - stores all info related to said server
     """
+
     current_players: list[Player]
     teams: list[TeamCombination]
     current_team: int
